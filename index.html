@@ -57,8 +57,8 @@
         function loadWeek() {
             if (currentWeekIndex === -1) return;
             const week = availableWeeks[currentWeekIndex];
-            document.getElementById("weekLabel").textContent = `KW ${week}`;
-            document.getElementById("title").textContent = `Menü KW ${week}`;
+            document.getElementById("weekLabel").textContent = `Woche ${week}`;
+            document.getElementById("title").textContent = `Essensplan ${week}`;
 
             const reader = new FileReader();
             reader.onload = function(e) {
