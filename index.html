@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menü KW</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        #navigation { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 10px; }
+        button { padding: 8px 16px; font-size: 16px; cursor: pointer; border: none; background-color: #007bff; color: white; border-radius: 5px; }
+        button:disabled { background-color: #aaa; cursor: not-allowed; }
+        table { width: 100%; max-width: 600px; margin: 0 auto; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+    <h2 id="title">Essensplan</h2>
+    <input type="file" id="jsonFileInput" accept=".json" multiple hidden>
+    <label for="jsonFileInput" style="cursor: pointer; color: #007bff;">📂 JSON-Dateien hochladen</label>
+
+    <div id="navigation">
+        <button id="prevBtn" disabled>⬅️</button>
+        <span id="weekLabel">KW --</span>
+        <button id="nextBtn" disabled>➡️</button>
+    </div>
+
+    <table id="jsonTable"></table>
+
+    <script>
+        let jsonFiles = {};
+        let availableWeeks = [];
+        let currentWeekIndex = -1;
+
+        document.getElementById("jsonFileInput").addEventListener("change", function(event) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+
+            jsonFiles = {};
+            availableWeeks = [];
+
+            Array.from(files).forEach(file => {
+                const match = file.name.match(/kw(\d{2})/i);
+                if (match) {
+                    const kw = parseInt(match[1]);
+                    jsonFiles[kw] = file;
+                    availableWeeks.push(kw);
+                }
+            });
+
+            if (availableWeeks.length > 0) {
+                availableWeeks.sort((a, b) => a - b);
+                currentWeekIndex = availableWeeks.length - 1;
+                loadWeek();
+            }
+        });
+
+        function loadWeek() {
+            if (currentWeekIndex === -1) return;
+            const week = availableWeeks[currentWeekIndex];
+            document.getElementById("weekLabel").textContent = `KW ${week}`;
+            document.getElementById("title").textContent = `Menü KW ${week}`;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    displayJSON(jsonData);
+                } catch (error) { console.error("Fehler beim Parsen der JSON-Datei."); }
+            };
+            reader.readAsText(jsonFiles[week]);
+
+            updateButtons();
+        }
+
+        function updateButtons() {
+            document.getElementById("prevBtn").disabled = currentWeekIndex <= 0;
+            document.getElementById("nextBtn").disabled = currentWeekIndex >= availableWeeks.length - 1;
+        }
+
+        document.getElementById("prevBtn").addEventListener("click", function() {
+            if (currentWeekIndex > 0) {
+                currentWeekIndex--;
+                loadWeek();
+            }
+        });
+
+        document.getElementById("nextBtn").addEventListener("click", function() {
+            if (currentWeekIndex < availableWeeks.length - 1) {
+                currentWeekIndex++;
+                loadWeek();
+            }
+        });
+
+        function displayJSON(data) {
+            const table = document.getElementById("jsonTable");
+            table.innerHTML = "";
+
+            if (Array.isArray(data)) {
+                const headers = Object.keys(data[0] || {});
+                let headerRow = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+                let bodyRows = data.map(row => "<tr>" + headers.map(h => `<td>${row[h]}</td>`).join("") + "</tr>").join("");
+                table.innerHTML = headerRow + bodyRows;
+            }
+        }
+    </script>
+
+</body>
+</html>
