@@ -27,47 +27,39 @@
     <table id="jsonTable"></table>
 
     <script>
-        let jsonFiles = {};
         let availableWeeks = [];
         let currentWeekIndex = -1;
 
-        document.getElementById("jsonFileInput").addEventListener("change", function(event) {
-            const files = event.target.files;
-            if (files.length === 0) return;
+        function fetchFiles() {
+            fetch(`https://api.github.com/repos/Redminer9630GitHub/gsw_menu/contents/2025/`)
+                .then(response => response.json())
+                .then(files => {
+                    availableWeeks = files
+                        .filter(file => file.name.match(/^gsw_menu_kw(\d{2})\.json$/))
+                        .map(file => {
+                            const weekMatch = file.name.match(/^gsw_menu_kw(\d{2})\.json$/);
+                            return { week: parseInt(weekMatch[1]), url: file.download_url };
+                        })
+                        .sort((a, b) => a.week - b.week);
 
-            jsonFiles = {};
-            availableWeeks = [];
-
-            Array.from(files).forEach(file => {
-                const match = file.name.match(/kw(\d{2})/i);
-                if (match) {
-                    const kw = parseInt(match[1]);
-                    jsonFiles[kw] = file;
-                    availableWeeks.push(kw);
-                }
-            });
-
-            if (availableWeeks.length > 0) {
-                availableWeeks.sort((a, b) => a - b);
-                currentWeekIndex = availableWeeks.length - 1;
-                loadWeek();
-            }
-        });
+                    if (availableWeeks.length > 0) {
+                        currentWeekIndex = availableWeeks.length - 1;
+                        loadWeek();
+                    }
+                })
+                .catch(error => console.error("Fehler beim Abrufen der Dateiliste:", error));
+        }
 
         function loadWeek() {
             if (currentWeekIndex === -1) return;
             const week = availableWeeks[currentWeekIndex];
-            document.getElementById("weekLabel").textContent = `Woche ${week}`;
-            document.getElementById("title").textContent = `Essensplan ${week}`;
+            document.getElementById("weekLabel").textContent = `Woche ${week.week}`;
+            document.getElementById("title").textContent = `Essensplan ${week.week}`;
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const jsonData = JSON.parse(e.target.result);
-                    displayJSON(jsonData);
-                } catch (error) { console.error("Fehler beim Parsen der JSON-Datei."); }
-            };
-            reader.readAsText(jsonFiles[week]);
+            fetch(week.url)
+                .then(response => response.json())
+                .then(data => displayJSON(data))
+                .catch(error => console.error("Fehler beim Laden der JSON-Datei.", error));
 
             updateButtons();
         }
@@ -102,7 +94,8 @@
                 table.innerHTML = headerRow + bodyRows;
             }
         }
-    </script>
 
+        fetchFiles();
+    </script>
 </body>
 </html>
