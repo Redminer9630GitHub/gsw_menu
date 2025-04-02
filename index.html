@@ -76,25 +76,32 @@
                 loadWeek();
             }
         });
-
+        
         function displayJSON(data) {
             const table = document.getElementById("jsonTable");
             table.innerHTML = "";
 
-            const headers = ["Tag", "Buffet", "Gericht 1", "Gericht 2", "Dessert 1", "Dessert 2"];
+            const headers = ["", "", "", "", "", ""];
             let headerRow = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+
             let bodyRows = Object.values(data).map(day => 
                 `<tr>
-                    <td>${day.day}</td>
-                    <td>${day.somename}</td>
-                    <td>${day.buffet1 || "-"}</td>
-                    <td>${day.buffet2 || "-"}</td>
-                    <td>${day.dessert1 || "-"}</td>
-                    <td>${day.dessert2 || "-"}</td>
+                    <td>${formatText(day.day)}</td>
+                    <td>${formatText(day.somename)}</td>
+                    <td>${formatText(day.buffet1 || "-")}</td>
+                    <td>${formatText(day.buffet2 || "-")}</td>
+                    <td>${formatText(day.dessert1 || "-")}</td>
+                    <td>${formatText(day.dessert2 || "-")}</td>
                 </tr>`
             ).join("");
-
             table.innerHTML = headerRow + bodyRows;
+        }
+
+        function formatText(text) {
+            if (!text) return "";
+            return text
+                .replace(/\$\$(.*?)\$\$/g, '<span style="font-size: 60%;">$1</span>') // $$Text$$ verkleinern
+                .replace(/<br>/g, '<br>'); // <br> in Zeilenumbruch umwandeln
         }
 
         loadWeek();
