@@ -15,104 +15,64 @@
     </style>
 </head>
 <body>
-
     <h2 id="title">Essensplan</h2>
     <div id="navigation">
         <button id="prevBtn" disabled>←</button>
         <span id="weekLabel">KW --</span>
         <button id="nextBtn" disabled>→</button>
     </div>
-
     <table id="jsonTable"></table>
-
     <script>
-        const jsonFiles = [
-            "gsw_menu_kw1.json",
-            "gsw_menu_kw2.json",
-            "gsw_menu_kw3.json",
-            "gsw_menu_kw4.json",
-            "gsw_menu_kw5.json",
-            "gsw_menu_kw6.json",
-            "gsw_menu_kw7.json",
-            "gsw_menu_kw8.json",
-            "gsw_menu_kw9.json",
-            "gsw_menu_kw10.json",
-            "gsw_menu_kw11.json",
-            "gsw_menu_kw12.json",
-            "gsw_menu_kw13.json",
-            "gsw_menu_kw14.json",
-            "gsw_menu_kw15.json",
-            "gsw_menu_kw16.json",
-            "gsw_menu_kw17.json",
-            "gsw_menu_kw18.json",
-            "gsw_menu_kw19.json",
-            "gsw_menu_kw20.json",
-            "gsw_menu_kw21.json",
-            "gsw_menu_kw22.json",
-            "gsw_menu_kw23.json",
-            "gsw_menu_kw24.json",
-            "gsw_menu_kw25.json",
-            "gsw_menu_kw26.json",
-            "gsw_menu_kw27.json",
-            "gsw_menu_kw28.json",
-            "gsw_menu_kw29.json",
-            "gsw_menu_kw30.json",
-            "gsw_menu_kw31.json",
-            "gsw_menu_kw32.json",
-            "gsw_menu_kw33.json",
-            "gsw_menu_kw34.json",
-            "gsw_menu_kw35.json",
-            "gsw_menu_kw36.json",
-            "gsw_menu_kw37.json",
-            "gsw_menu_kw38.json",
-            "gsw_menu_kw39.json",
-            "gsw_menu_kw40.json",
-            "gsw_menu_kw41.json",
-            "gsw_menu_kw42.json",
-            "gsw_menu_kw43.json",
-            "gsw_menu_kw44.json",
-            "gsw_menu_kw45.json",
-            "gsw_menu_kw46.json",
-            "gsw_menu_kw47.json",
-            "gsw_menu_kw48.json",
-            "gsw_menu_kw49.json",
-            "gsw_menu_kw50.json",
-            "gsw_menu_kw51.json",
-            "gsw_menu_kw52.json"
-        ];
-        let currentWeekIndex = jsonFiles.length - 1;
+        let currentWeek = getCurrentWeek();
+        let lastAvailableWeek = currentWeek;
+
+        function getCurrentWeek() {
+            const now = new Date();
+            const firstJan = new Date(now.getFullYear(), 0, 1);
+            const dayOfYear = ((now - firstJan + 86400000) / 86400000);
+            return Math.ceil(dayOfYear / 7);
+        }
 
         function loadWeek() {
-            if (currentWeekIndex === -1) return;
-            const file = jsonFiles[currentWeekIndex];
-            const weekNumber = file.match(/kw(\d{2})/i)[1];
-
-            document.getElementById("weekLabel").textContent = `Woche ${weekNumber}`;
-            document.getElementById("title").textContent = `Essensplan GSW`;
+            const file = `gsw_menu_kw${currentWeek}.json`;
+            document.getElementById("weekLabel").textContent = `Woche ${currentWeek}`;
+            document.getElementById("title").textContent = `Essensplan KW ${currentWeek}`;
 
             fetch(file)
-                .then(response => response.json())
-                .then(data => displayJSON(data))
-                .catch(error => console.error("Fehler beim Laden der JSON-Datei:", error));
-
-            updateButtons();
+                .then(response => {
+                    if (!response.ok) throw new Error("Datei nicht gefunden");
+                    return response.json();
+                })
+                .then(data => {
+                    lastAvailableWeek = currentWeek;  // Setzt die letzte verfügbare Woche
+                    displayJSON(data);
+                    updateButtons();
+                })
+                .catch(() => {
+                    if (currentWeek > 1) {
+                        currentWeek--;
+                        loadWeek();
+                    } else {
+                        console.error("Keine gültigen Dateien gefunden.");
+                    }
+                });
         }
 
         function updateButtons() {
-            document.getElementById("prevBtn").disabled = currentWeekIndex <= 0;
-            document.getElementById("nextBtn").disabled = currentWeekIndex >= jsonFiles.length - 1;
+            document.getElementById("prevBtn").disabled = currentWeek <= 1;
+            document.getElementById("nextBtn").disabled = currentWeek >= lastAvailableWeek;
         }
 
         document.getElementById("prevBtn").addEventListener("click", function() {
-            if (currentWeekIndex > 0) {
-                currentWeekIndex--;
+            if (currentWeek > 1) {
+                currentWeek--;
                 loadWeek();
             }
         });
 
         document.getElementById("nextBtn").addEventListener("click", function() {
-            if (currentWeekIndex < jsonFiles.length - 1) {
-                currentWeekIndex++;
+            if (currentWeek < lastAvailableWeek) {
+                currentWeek++;
                 loadWeek();
             }
         });
