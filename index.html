@@ -44,15 +44,17 @@
                     return response.json();
                 })
                 .then(data => {
-                    lastAvailableWeek = currentWeek;
+                    if (lastAvailableWeek < currentWeek) lastAvailableWeek = currentWeek;
                     displayJSON(data);
                     updateButtons();
                 })
                 .catch(() => {
-                    if (currentWeek > 1) {
+                     if (currentWeek > 1) {
                         currentWeek--;
-                        loadWeek();
-                    } else { console.error("Keine gültigen Dateien gefunden."); }
+                        setTimeout(loadWeek, 100);
+                    } else {
+                        console.error("Keine gültigen Dateien gefunden.");
+                    }
                 });
         }
 
