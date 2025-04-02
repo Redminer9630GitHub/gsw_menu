@@ -36,7 +36,7 @@
         function loadWeek() {
             const file = `gsw_menu_kw${currentWeek}.json`;
             document.getElementById("weekLabel").textContent = `Woche ${currentWeek}`;
-            document.getElementById("title").textContent = `Essensplan KW ${currentWeek}`;
+            document.getElementById("title").textContent = `Essensplan`;
 
             fetch(file)
                 .then(response => {
@@ -44,7 +44,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    lastAvailableWeek = currentWeek;  // Setzt die letzte verfügbare Woche
+                    lastAvailableWeek = currentWeek;
                     displayJSON(data);
                     updateButtons();
                 })
@@ -52,9 +52,7 @@
                     if (currentWeek > 1) {
                         currentWeek--;
                         loadWeek();
-                    } else {
-                        console.error("Keine gültigen Dateien gefunden.");
-                    }
+                    } else { console.error("Keine gültigen Dateien gefunden."); }
                 });
         }
 
@@ -101,9 +99,8 @@
             if (!text) return "";
             return text
                 .replace(/\$\$(.*?)\$\$/g, '<span style="font-size: 60%;">$1</span>') // $$Text$$ verkleinern
-                .replace(/<br>/g, '<br>'); // <br> in Zeilenumbruch umwandeln
+                .replace(/<br>/g, '<br>');
         }
-
         loadWeek();
     </script>
 </body>
