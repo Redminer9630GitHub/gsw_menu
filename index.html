@@ -59,7 +59,7 @@
         }
 
         function updateButtons() {
-            document.getElementById("prevBtn").disabled = currentWeek <= 1;
+            document.getElementById("prevBtn").disabled = currentWeek <= 1 || !fileExists(`json25/gsw_menu_kw${currentWeek - 1}.json`);
             document.getElementById("nextBtn").disabled = currentWeek >= lastAvailableWeek;
         }
 
@@ -99,6 +99,14 @@
                 .replace(/\$\$(.*?)\$\$/g, '<span style="font-size: 60%;">$1</span>') // $$Text$$ verkleinern
                 .replace(/<br>/g, '<br>');
         }
+        
+        function fileExists(url) {
+            let xhr = new XMLHttpRequest();
+            xhr.open('HEAD', url, false);
+            xhr.send();
+            return xhr.status !== 404;
+        }
+
         loadWeek();
     </script>
 </body>
