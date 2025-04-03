@@ -82,25 +82,15 @@
             table.innerHTML = "";
 
             let headerRow = "<tr>" + Object.values(data).map(day => `<th>${day.day}</th>`).join("") + "</tr>";
-            let buffetRow = "<tr>" + Object.values(data).map(day => `
-                <td>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr><td style="border-bottom: 2px solid black;">${day.buffet1 || "-"}</td></tr>
-                        <tr><td>${day.buffet2 || "-"}</td></tr>
-                    </table>
-                </td>
-            `).join("") + "</tr>";
 
-            let dessertRow = "<tr>" + Object.values(data).map(day => `
-                <td>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr><td style="border-bottom: 2px solid black;">${day.dessert1 || "-"}</td></tr>
-                        <tr><td>${day.dessert2 || "-"}</td></tr>
-                    </table>
-                </td>
-            `).join("") + "</tr>";
+            let bodyRows = Object.values(data).map(day => 
+                `<tr>
+                    <td>${formatTextWithLine(day.buffet1, day.buffet2)}</td>
+                    <td>${formatTextWithLine(day.dessert1, day.dessert2)}</td>
+                </tr>`
+            ).join("");
 
-            table.innerHTML = headerRow + buffetRow + dessertRow;
+            table.innerHTML = headerRow + bodyRows;
         }
 
         function formatText(text) {
@@ -116,6 +106,8 @@
             xhr.send();
             return xhr.status !== 404;
         }
+        
+        function formatTextWithLine(text1, text2) { return `${text1 || "-"}<hr style="margin: 5px 0;">${text2 || "-"}`; }
 
         loadWeek();
     </script>
