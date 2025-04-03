@@ -81,16 +81,26 @@
             const table = document.getElementById("jsonTable");
             table.innerHTML = "";
 
-            const days = Object.keys(data).map(key => formatText(data[key].day || "-"));
+            let headerRow = "<tr>" + Object.values(data).map(day => `<th>${day.day}</th>`).join("") + "</tr>";
+            let buffetRow = "<tr>" + Object.values(data).map(day => `
+                <td>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr><td style="border-bottom: 2px solid black;">${day.buffet1 || "-"}</td></tr>
+                        <tr><td>${day.buffet2 || "-"}</td></tr>
+                    </table>
+                </td>
+            `).join("") + "</tr>";
 
-            let headerRow = "<tr>" + days.map(day => `<th>${day}</th>`).join("") + "</tr>";
+            let dessertRow = "<tr>" + Object.values(data).map(day => `
+                <td>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr><td style="border-bottom: 2px solid black;">${day.dessert1 || "-"}</td></tr>
+                        <tr><td>${day.dessert2 || "-"}</td></tr>
+                    </table>
+                </td>
+            `).join("") + "</tr>";
 
-            const categories = ["somename", "buffet1", "buffet2", "dessert1", "dessert2"];
-            let bodyRows = categories.map(category => 
-                `<tr>${Object.keys(data).map(key => `<td>${formatText(data[key][category] || "-")}</td>`).join("")}</tr>`
-            ).join("");
-
-            table.innerHTML = headerRow + bodyRows;
+            table.innerHTML = headerRow + buffetRow + dessertRow;
         }
 
         function formatText(text) {
