@@ -81,20 +81,15 @@
             const table = document.getElementById("jsonTable");
             table.innerHTML = "";
 
-            const headers = ["", "", "", "", "", ""];
-            let headerRow = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
-    
-            let bodyRows = Object.keys(data).map(key => {
-                let day = data[key]; 
-                return `<tr>
-                            <td>${formatText(day.day || "-")}</td>
-                            <td>${formatText(day.somename || "-")}</td>
-                            <td>${formatText(day.buffet1 || "-")}</td>
-                            <td>${formatText(day.buffet2 || "-")}</td>
-                            <td>${formatText(day.dessert1 || "-")}</td>
-                            <td>${formatText(day.dessert2 || "-")}</td>
-                        </tr>`;
-            }).join("");
+            const days = Object.keys(data).map(key => formatText(data[key].day || "-"));
+
+            let headerRow = "<tr>" + days.map(day => `<th>${day}</th>`).join("") + "</tr>";
+
+            const categories = ["somename", "buffet1", "buffet2", "dessert1", "dessert2"];
+            let bodyRows = categories.map(category => 
+                `<tr>${Object.keys(data).map(key => `<td>${formatText(data[key][category] || "-")}</td>`).join("")}</tr>`
+            ).join("");
+
             table.innerHTML = headerRow + bodyRows;
         }
 
