@@ -81,13 +81,13 @@
             const table = document.getElementById("jsonTable");
             table.innerHTML = "";
 
-            let headerRow = "<tr>" + Object.values(data).map(day => `<th>${day.day}</th>`).join("") + "</tr>";
+            const days = Object.keys(data).map(key => formatText(data[key].day || "-"));
 
-            let bodyRows = Object.values(data).map(day => 
-                `<tr>
-                    <td>${formatTextWithLine(day.buffet1, day.buffet2)}</td>
-                    <td>${formatTextWithLine(day.dessert1, day.dessert2)}</td>
-                </tr>`
+            let headerRow = "<tr>" + days.map(day => `<th>${day}</th>`).join("") + "</tr>";
+
+            const categories = ["somename", "buffet1", "buffet2", "dessert1", "dessert2"];
+            let bodyRows = categories.map(category => 
+                `<tr>${Object.keys(data).map(key => `<td>${formatText(data[key][category] || "-")}</td>`).join("")}</tr>`
             ).join("");
 
             table.innerHTML = headerRow + bodyRows;
@@ -106,8 +106,6 @@
             xhr.send();
             return xhr.status !== 404;
         }
-        
-        function formatTextWithLine(text1, text2) { return `${text1 || "-"}<hr style="margin: 5px 0;">${text2 || "-"}`; }
 
         loadWeek();
     </script>
